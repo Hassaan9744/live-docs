@@ -13,7 +13,6 @@ import { Notifications } from "@/components/notificationModal";
 
 export default async function Home() {
   const clerkUser = await currentUser();
-  console.log("clerkUser", clerkUser);
   if (!clerkUser) {
     redirect("/sign-in");
   }

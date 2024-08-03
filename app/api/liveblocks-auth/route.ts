@@ -5,7 +5,6 @@ import { redirect } from "next/navigation";
 
 export async function POST() {
   const clerkUser = await currentUser();
-  console.log("clerkUser", clerkUser);
   if (!clerkUser) {
     return redirect("/message");
   }
