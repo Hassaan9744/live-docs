@@ -19,7 +19,6 @@ export const getClerkUsers = async ({ userIds }: { userIds: string[] }) => {
     const sortedUser = userIds.map((email) =>
       users.find((user) => user.email === email)
     );
-    console.log("sortedUser", sortedUser);
     return parseStringify(sortedUser);
   } catch (error) {
     console.log("error", error);

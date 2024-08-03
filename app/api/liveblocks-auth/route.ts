@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 export async function POST() {
   const clerkUser = await currentUser();
   if (!clerkUser) {
-    return redirect("/message");
+    return redirect("/sign-in");
   }
 
   const { id, firstName, lastName, emailAddresses, imageUrl } = clerkUser;

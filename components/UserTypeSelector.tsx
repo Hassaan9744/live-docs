@@ -27,10 +27,10 @@ const UserTypeSelector = ({
         <SelectItem value="viewer" className="shad-select-item">
           Can view
         </SelectItem>
+        <SelectItem value="editor" className="shad-select-item">
+          Can edit
+        </SelectItem>
       </SelectContent>
-      <SelectItem value="editor" className="shad-select-item">
-        Can edit
-      </SelectItem>
     </Select>
   );
 };

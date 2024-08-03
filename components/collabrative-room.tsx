@@ -1,25 +1,27 @@
 "use client";
+
 import { ClientSideSuspense, RoomProvider } from "@liveblocks/react/suspense";
 import { Editor } from "@/components/editor/Editor";
 import Header from "@/components/header/header";
 import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
-import Loader from "./loader";
 import ActiveCollaborators from "./active-collaborators";
 import { useEffect, useRef, useState } from "react";
 import { Input } from "./ui/input";
 import Image from "next/image";
 import { updateDocument } from "@/lib/actions/room.actions";
+import Loader from "./loader";
 import ShareModal from "./share-modal";
-import { metadata } from "@/app/layout";
-const collaborativeRoom = ({
+
+const CollaborativeRoom = ({
   roomId,
   roomMetadata,
   users,
+  currentUserType,
 }: CollaborativeRoomProps) => {
-  const currenUserType = "editor";
   const [documentTitle, setDocumentTitle] = useState(roomMetadata.title);
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
+
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLDivElement>(null);
 
@@ -27,40 +29,52 @@ const collaborativeRoom = ({
     e: React.KeyboardEvent<HTMLInputElement>
   ) => {
     if (e.key === "Enter") {
+      setLoading(true);
+
       try {
         if (documentTitle !== roomMetadata.title) {
-          await updateDocument(roomId, documentTitle);
+          const updatedDocument = await updateDocument(roomId, documentTitle);
+
+          if (updatedDocument) {
+            setEditing(false);
+          }
         }
       } catch (error) {
-        console.log("error", error);
+        console.error(error);
       }
+
       setLoading(false);
     }
   };
+
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (e: MouseEvent) => {
       if (
         containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
+        !containerRef.current.contains(e.target as Node)
       ) {
         setEditing(false);
+        updateDocument(roomId, documentTitle);
       }
-      updateDocument(roomId, documentTitle);
     };
+
     document.addEventListener("mousedown", handleClickOutside);
+
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [roomId, documentTitle]);
+
   useEffect(() => {
     if (editing && inputRef.current) {
       inputRef.current.focus();
     }
   }, [editing]);
+
   return (
     <RoomProvider id={roomId}>
       <ClientSideSuspense fallback={<Loader />}>
-        <div className="collabrative-room">
+        <div className="collaborative-room">
           <Header>
             <div
               ref={containerRef}
@@ -74,7 +88,7 @@ const collaborativeRoom = ({
                   placeholder="Enter title"
                   onChange={(e) => setDocumentTitle(e.target.value)}
                   onKeyDown={updateTitleHandler}
-                  disabled={!editing}
+                  disable={!editing}
                   className="document-title-input"
                 />
               ) : (
@@ -82,29 +96,34 @@ const collaborativeRoom = ({
                   <p className="document-title">{documentTitle}</p>
                 </>
               )}
-              {currenUserType === "editor" && editing && (
+
+              {currentUserType === "editor" && !editing && (
                 <Image
                   src="/assets/icons/edit.svg"
-                  alt="editTitle"
+                  alt="edit"
                   width={24}
                   height={24}
                   onClick={() => setEditing(true)}
                   className="pointer"
                 />
               )}
-              {currenUserType !== "editor" && editing && (
-                <p className="view-only-tag">View Only</p>
+
+              {currentUserType !== "editor" && !editing && (
+                <p className="view-only-tag">View only</p>
               )}
+
               {loading && <p className="text-sm text-gray-400">saving...</p>}
             </div>
-            <div className="flex -w-full flex-1 justify-end gap-2 sm:gap-3">
+            <div className="flex w-full flex-1 justify-end gap-2 sm:gap-3">
               <ActiveCollaborators />
+
               <ShareModal
                 roomId={roomId}
                 collaborators={users}
                 creatorId={roomMetadata.creatorId}
-                currentUserType={currenUserType}
+                currentUserType={currentUserType}
               />
+
               <SignedOut>
                 <SignInButton />
               </SignedOut>
@@ -113,11 +132,11 @@ const collaborativeRoom = ({
               </SignedIn>
             </div>
           </Header>
-          <Editor roomId={roomId} currentUserType={currenUserType} />
+          <Editor roomId={roomId} currentUserType={currentUserType} />
         </div>
       </ClientSideSuspense>
     </RoomProvider>
   );
 };
 
-export default collaborativeRoom;
+export default CollaborativeRoom;

@@ -9,6 +9,8 @@ import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
+import React from "react";
+
 import {
   FloatingComposer,
   FloatingThreads,
@@ -16,12 +18,13 @@ import {
   LiveblocksPlugin,
   useEditorStatus,
 } from "@liveblocks/react-lexical";
-import React from "react";
-import Loader from "@/components/loader";
-import FloatingToolbar from "./plugins/FloatingToolbar";
+import Loader from "../loader";
+
+import FloatingToolbarPlugin from "./plugins/FloatingToolbar";
 import { useThreads } from "@liveblocks/react/suspense";
 import Comments from "../comments";
 import { DeleteModal } from "../deleteModal";
+
 // Catch any errors that occur during Lexical updates and log them
 // or throw them as needed. If you don't throw them, Lexical will
 // try to recover gracefully without losing user data.
@@ -29,8 +32,7 @@ import { DeleteModal } from "../deleteModal";
 function Placeholder() {
   return <div className="editor-placeholder">Enter some rich text...</div>;
 }
-const status = useEditorStatus();
-const { threads } = useThreads();
+
 export function Editor({
   roomId,
   currentUserType,
@@ -38,6 +40,9 @@ export function Editor({
   roomId: string;
   currentUserType: UserType;
 }) {
+  const status = useEditorStatus();
+  const { threads } = useThreads();
+
   const initialConfig = liveblocksConfig({
     namespace: "Editor",
     nodes: [HeadingNode],
@@ -56,7 +61,8 @@ export function Editor({
           <ToolbarPlugin />
           {currentUserType === "editor" && <DeleteModal roomId={roomId} />}
         </div>
-        <div className="editor-wrapper flex flex-col justify-start items-center">
+
+        <div className="editor-wrapper flex flex-col items-center justify-start">
           {status === "not-loaded" || status === "loading" ? (
             <Loader />
           ) : (
@@ -68,12 +74,12 @@ export function Editor({
                 placeholder={<Placeholder />}
                 ErrorBoundary={LexicalErrorBoundary}
               />
-              {currentUserType === "editor" && <FloatingToolbar />}
-
+              {currentUserType === "editor" && <FloatingToolbarPlugin />}
               <HistoryPlugin />
               <AutoFocusPlugin />
             </div>
           )}
+
           <LiveblocksPlugin>
             <FloatingComposer className="w-[350px]" />
             <FloatingThreads threads={threads} />
