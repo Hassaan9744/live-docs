@@ -21,7 +21,7 @@ import Loader from "@/components/loader";
 import FloatingToolbar from "./plugins/FloatingToolbar";
 import { useThreads } from "@liveblocks/react/suspense";
 import Comments from "../comments";
-// import DeleteModal from "@/components/delete-modal"
+import { DeleteModal } from "../deleteModal";
 // Catch any errors that occur during Lexical updates and log them
 // or throw them as needed. If you don't throw them, Lexical will
 // try to recover gracefully without losing user data.
@@ -54,7 +54,7 @@ export function Editor({
       <div className="editor-container size-full">
         <div className="toolbar-wrapper flex min-w-full justify-between">
           <ToolbarPlugin />
-          {/* {currentUserType === 'editor' && <DeleteModal roomId={roomId} /> } */}
+          {currentUserType === "editor" && <DeleteModal roomId={roomId} />}
         </div>
         <div className="editor-wrapper flex flex-col justify-start items-center">
           {status === "not-loaded" || status === "loading" ? (
@@ -69,6 +69,7 @@ export function Editor({
                 ErrorBoundary={LexicalErrorBoundary}
               />
               {currentUserType === "editor" && <FloatingToolbar />}
+
               <HistoryPlugin />
               <AutoFocusPlugin />
             </div>
