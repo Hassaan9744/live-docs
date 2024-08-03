@@ -15,7 +15,7 @@ export default async function Home() {
   const clerkUser = await currentUser();
   console.log("clerkUser", clerkUser);
   if (!clerkUser) {
-    redirect("/message");
+    redirect("/sign-in");
   }
   const roomDocumetns = await getDocuments(
     `${clerkUser?.emailAddresses[0].emailAddress}`
